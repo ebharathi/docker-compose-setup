@@ -1,0 +1,42 @@
+version: '3'
+services:
+ postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - my_network
+ backend:
+    image: elayabharathimv/backend
+    environment:
+      DB_HOST: postgres 
+      DB_PORT: 5432
+      DB_USER: myuser
+      DB_PASSWORD: mypassword
+      DB_NAME: mydb
+    depends_on:
+      - postgres
+    command: bash -c "while ! nc -z postgres 5432; do echo 'Waiting for PostgreSQL...'; sleep 2; done; node /app"
+
+    ports:
+      - "5000:5000"
+    networks:
+      - my_network
+ frontend:
+    image: elayabharathimv/frontend
+    ports:
+     - "80:80"
+    networks:
+     - my_network
+
+networks:
+ my_network:   
+
+volumes:
+ postgres-data:
